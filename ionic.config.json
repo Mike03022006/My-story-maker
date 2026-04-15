@@ -1,0 +1,7 @@
+{
+  "name": "infantil",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
