@@ -1,0 +1,187 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Planes de Suscripción</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="subscription-container">
+    
+    <!-- Header -->
+    <div class="header-section">
+      <h1>Elige tu plan perfecto</h1>
+      <p>Desbloquea funciones increíbles para crear historias mágicas</p>
+    </div>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <div 
+        *ngFor="let plan of plans" 
+        class="plan-card"
+        [class.current]="isCurrentPlan(plan.id)"
+        [class.recommended]="plan.id === 'basic'"
+        (click)="selectPlan(plan)">
+        
+        <!-- Badge -->
+        <div class="plan-badge" *ngIf="isCurrentPlan(plan.id)">
+          ✓ Plan Actual
+        </div>
+        <div class="plan-badge recommended-badge" *ngIf="plan.id === 'basic' && !isCurrentPlan(plan.id)">
+          ⭐ Recomendado
+        </div>
+
+        <!-- Icon -->
+        <div class="plan-icon">{{ plan.icon }}</div>
+
+        <!-- Name -->
+        <h2 class="plan-name">{{ plan.name }}</h2>
+
+        <!-- Price -->
+        <div class="plan-price">
+          <span class="price-amount" *ngIf="plan.price > 0">
+            {{ subscriptionService.formatPrice(plan.price) }}
+          </span>
+          <span class="price-amount" *ngIf="plan.price === 0">
+            Gratis
+          </span>
+          <span class="price-period" *ngIf="plan.price > 0">/mes</span>
+        </div>
+
+        <!-- Description -->
+        <p class="plan-description">{{ plan.description }}</p>
+
+        <!-- Features -->
+        <div class="plan-features">
+          <div class="feature-item">
+            <ion-icon name="people" color="primary"></ion-icon>
+            <span>
+              {{ plan.features.maxCharacters === 0 ? 'Todos los personajes' : plan.features.maxCharacters + ' personajes' }}
+            </span>
+          </div>
+
+          <div class="feature-item">
+            <ion-icon name="location" color="primary"></ion-icon>
+            <span>
+              {{ plan.features.maxSettings === 0 ? 'Todos los entornos' : plan.features.maxSettings + ' entornos' }}
+            </span>
+          </div>
+
+          <div class="feature-item">
+            <ion-icon name="document-text" color="primary"></ion-icon>
+            <span>
+              {{ plan.features.storyLength === 'short' ? 'Historias cortas' : 'Historias completas' }}
+            </span>
+          </div>
+
+          <div class="feature-item" [class.disabled]="!plan.features.hasAudio">
+            <ion-icon [name]="plan.features.hasAudio ? 'volume-high' : 'volume-mute'" 
+                      [color]="plan.features.hasAudio ? 'primary' : 'medium'"></ion-icon>
+            <span>
+              {{ plan.features.hasAudio ? 'Audio de lectura' : 'Sin audio' }}
+            </span>
+          </div>
+
+          <div class="feature-item" [class.disabled]="!plan.features.hasImage">
+            <ion-icon [name]="plan.features.hasImage ? 'image' : 'image-outline'" 
+                      [color]="plan.features.hasImage ? 'primary' : 'medium'"></ion-icon>
+            <span>
+              {{ plan.features.hasImage ? 'Imagen generada por IA' : 'Sin imagen' }}
+            </span>
+          </div>
+
+          <div class="feature-item" [class.disabled]="!plan.features.canSaveStories">
+            <ion-icon [name]="plan.features.canSaveStories ? 'save' : 'close-circle'" 
+                      [color]="plan.features.canSaveStories ? 'primary' : 'medium'"></ion-icon>
+            <span>
+              {{ plan.features.canSaveStories ? 'Guardar historias' : 'No se guardan' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Button -->
+        <ion-button 
+          expand="block" 
+          [color]="isCurrentPlan(plan.id) ? 'medium' : 'primary'"
+          [disabled]="isCurrentPlan(plan.id)"
+          class="plan-button">
+          {{ isCurrentPlan(plan.id) ? 'Plan Actual' : (plan.price === 0 ? 'Cambiar a Gratuito' : 'Suscribirse') }}
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+
+<!-- Payment Modal -->
+<div class="payment-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
+  <div class="payment-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Método de Pago</h2>
+      <button class="close-btn" (click)="closePaymentModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="selected-plan-info">
+        <div class="plan-icon-large">{{ selectedPlan?.icon }}</div>
+        <h3>{{ selectedPlan?.name }}</h3>
+        <p class="plan-price-large">{{ subscriptionService.formatPrice(selectedPlan?.price || 0) }}/mes</p>
+      </div>
+
+      <div class="payment-methods">
+        <h4>Selecciona tu método de pago:</h4>
+
+        <div 
+          class="payment-method-card"
+          [class.selected]="selectedPaymentMethod === 'pse'"
+          (click)="selectPaymentMethod('pse')">
+          <div class="payment-icon">🏦</div>
+          <div class="payment-info">
+            <h5>PSE</h5>
+            <p>Pago Seguro en Línea</p>
+          </div>
+          <ion-icon 
+            [name]="selectedPaymentMethod === 'pse' ? 'radio-button-on' : 'radio-button-off'"
+            [color]="selectedPaymentMethod === 'pse' ? 'primary' : 'medium'">
+          </ion-icon>
+        </div>
+
+        <div 
+          class="payment-method-card"
+          [class.selected]="selectedPaymentMethod === 'playstore'"
+          (click)="selectPaymentMethod('playstore')">
+          <div class="payment-icon">📱</div>
+          <div class="payment-info">
+            <h5>Google Play</h5>
+            <p>Pago con Google Play Store</p>
+          </div>
+          <ion-icon 
+            [name]="selectedPaymentMethod === 'playstore' ? 'radio-button-on' : 'radio-button-off'"
+            [color]="selectedPaymentMethod === 'playstore' ? 'primary' : 'medium'">
+          </ion-icon>
+        </div>
+      </div>
+
+      <div class="payment-note">
+        <ion-icon name="information-circle" color="primary"></ion-icon>
+        <p>Este es un pago simulado para demostración. No se realizará ningún cargo real.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <ion-button expand="block" (click)="closePaymentModal()" fill="outline">
+        Cancelar
+      </ion-button>
+      <ion-button 
+        expand="block" 
+        (click)="processPayment()"
+        [disabled]="!selectedPaymentMethod">
+        Confirmar Pago
+      </ion-button>
+    </div>
+  </div>
+</div>

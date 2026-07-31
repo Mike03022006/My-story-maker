@@ -1,37 +1,238 @@
 /*
  * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
  */
 
-/* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
+@import "@ionic/angular/css/palettes/dark.class.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
+/* ── Dark Mode Variables ── */
+:root.ion-palette-dark {
+  --color-bg:            #121212;
+  --color-bg-card:       #1E1E1E;
+  --color-text:          #F5F6FA;
+  --color-text-light:    #DCDDE1;
+  --color-text-muted:    #7F8FA6;
+  --color-border:        #2F3640;
+  --shadow-color:        0 4px 20px rgba(0,0,0,0.5);
+}
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap');
+
+/* ── Variables ── */
+:root {
+  --color-primary:       #FF6B6B;
+  --color-primary-light: #FF8E8E;
+  --color-primary-dark:  #E85555;
+  --color-secondary:     #4ECDC4;
+  --color-secondary-light: #7EDDD7;
+  --color-accent:        #FFE66D;
+  --color-accent-dark:   #F5D84A;
+  --color-purple:        #A855F7;
+  --color-purple-light:  #C084FC;
+  --color-bg:            #FFF9F0;
+  --color-bg-card:       #FFFFFF;
+  --color-text:          #2D3436;
+  --color-text-light:    #636E72;
+  --color-text-muted:    #B2BEC3;
+  --color-border:        #F0E6D3;
+  --color-success:       #55EFC4;
+  --color-error:         #FF7675;
+  --color-warning:       #FDCB6E;
+
+  --font-display: 'Baloo 2', cursive;
+  --font-body:    'Nunito', sans-serif;
+
+  --radius-sm:   12px;
+  --radius-md:   20px;
+  --radius-lg:   32px;
+  --radius-xl:   48px;
+  --radius-full: 9999px;
+
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:    0 4px 20px rgba(0,0,0,0.10);
+  --shadow-lg:    0 8px 40px rgba(0,0,0,0.14);
+  --shadow-color: 0 4px 20px rgba(255,107,107,0.25);
+}
+
+/* ── Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow-x: hidden;
+}
+
+ion-app     { background: var(--color-bg); }
+ion-content { --background: var(--color-bg); }
+
+/* ── Botones globales ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 14px 32px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  letter-spacing: 0.5px;
+  &:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(255,107,107,0.2); }
+  &:disabled { opacity: 0.7; }
+}
+
+.btn-secondary {
+  background: var(--color-bg-card);
+  color: var(--color-primary);
+  border: 2.5px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 13px 32px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  &:active { background: var(--color-primary); color: white; }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-light);
+  border: none;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* ── Nuevo: btn-back y utilidades de layout ── */
+.btn-back {
+  background: var(--color-bg-card);
+  color: var(--color-text-light);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 15px 20px;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:active { background: #F5F5F5; }
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ── Nuevo: step-card compartido ── */
+.step-card {
+  background: var(--color-bg-card);
+  border-radius: 28px;
+  padding: 24px 20px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Nuevo: step-title compartido ── */
+.step-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  .step-emoji { font-size: 2.2rem; animation: float 3s ease-in-out infinite; }
+  h2 { font-size: 1.4rem; font-weight: 800; color: var(--color-text); margin: 0; }
+  p  { font-size: 0.82rem; color: var(--color-text-light); margin: 0; }
+}
+
+/* ── Nuevo: error-msg compartido ── */
+.error-msg {
+  background: #FFF5F5;
+  border: 1.5px solid #FFB3B3;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+/* ── Input global ── */
+.input-field {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(255,107,107,0.12);
+  }
+  &::placeholder { color: var(--color-text-muted); }
+}
+
+/* ── Decoraciones ── */
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Animaciones ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-6deg); }
+  75%       { transform: rotate(6deg); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(100%); }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.5s ease forwards; }
+.animate-fadeIn   { animation: fadeIn 0.4s ease forwards; }
+.animate-scaleIn  { animation: scaleIn 0.3s ease forwards; }

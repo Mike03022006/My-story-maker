@@ -1,0 +1,123 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Configuración de Voz</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="settings-container">
+    
+    <!-- Selector de Voz -->
+    <div class="setting-section">
+      <h2>🗣️ Voz</h2>
+      <p class="setting-description">Selecciona la voz que leerá las historias</p>
+      
+      <ion-list>
+        <ion-item>
+          <ion-label>Voz</ion-label>
+          <ion-select 
+            [(ngModel)]="selectedVoice" 
+            (ionChange)="onVoiceChange($event)"
+            interface="action-sheet"
+            placeholder="Voz por defecto">
+            <ion-select-option value="">Voz por defecto del sistema</ion-select-option>
+            <ion-select-option 
+              *ngFor="let voice of spanishVoices" 
+              [value]="voice.voiceURI">
+              {{ voice.name }} ({{ voice.lang }})
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" (click)="testVoice()" color="secondary">
+        <ion-icon name="play" slot="start"></ion-icon>
+        Probar voz
+      </ion-button>
+    </div>
+
+    <!-- Velocidad -->
+    <div class="setting-section">
+      <h2>⚡ Velocidad</h2>
+      <p class="setting-description">Ajusta qué tan rápido se lee ({{ settings?.rate }}x)</p>
+      
+      <ion-list>
+        <ion-item>
+          <ion-range 
+            [value]="settings?.rate" 
+            (ionChange)="onRateChange($event)"
+            min="0.5" 
+            max="2.0" 
+            step="0.1"
+            pin="true"
+            color="primary">
+            <ion-label slot="start">🐢 Lento</ion-label>
+            <ion-label slot="end">🐇 Rápido</ion-label>
+          </ion-range>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Tono -->
+    <div class="setting-section">
+      <h2>🎵 Tono</h2>
+      <p class="setting-description">Ajusta qué tan agudo o grave suena ({{ settings?.pitch }}x)</p>
+      
+      <ion-list>
+        <ion-item>
+          <ion-range 
+            [value]="settings?.pitch" 
+            (ionChange)="onPitchChange($event)"
+            min="0.5" 
+            max="2.0" 
+            step="0.1"
+            pin="true"
+            color="secondary">
+            <ion-label slot="start">🔉 Grave</ion-label>
+            <ion-label slot="end">🔊 Agudo</ion-label>
+          </ion-range>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Volumen -->
+    <div class="setting-section">
+      <h2>🔊 Volumen</h2>
+      <p class="setting-description">Ajusta el volumen de la lectura ({{ (settings?.volume || 0) * 100 }}%)</p>
+      
+      <ion-list>
+        <ion-item>
+          <ion-range 
+            [value]="settings?.volume" 
+            (ionChange)="onVolumeChange($event)"
+            min="0" 
+            max="1" 
+            step="0.1"
+            pin="true"
+            color="success">
+            <ion-label slot="start">🔇</ion-label>
+            <ion-label slot="end">🔊</ion-label>
+          </ion-range>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Información -->
+    <div class="info-section">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>💡 Consejo</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          Usa el botón "Probar voz" para escuchar cómo sonarán las historias con tu configuración actual.
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+  </div>
+</ion-content>

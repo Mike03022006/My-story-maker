@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test n8n Connection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        .result.loading {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+        .story-content {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .story-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Conexión n8n</h1>
+        <p style="text-align: center; color: #666;">Prueba tu webhook de n8n antes de usarlo en la app</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="webhookUrl">URL del Webhook de n8n:</label>
+                <input 
+                    type="url" 
+                    id="webhookUrl" 
+                    placeholder="https://tu-instancia-n8n.com/webhook/generate-story"
+                    value="https://desarrollolmal.app.n8n.cloud/webhook/generate-story"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="characters">Personajes (separados por coma):</label>
+                <input 
+                    type="text" 
+                    id="characters" 
+                    placeholder="dragón, princesa, mago"
+                    value="dragón, princesa"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="setting">Lugar:</label>
+                <select id="setting">
+                    <option value="bosque">Bosque Mágico</option>
+                    <option value="espacio">Espacio Exterior</option>
+                    <option value="oceano">Océano Profundo</option>
+                    <option value="castillo">Castillo Encantado</option>
+                    <option value="ciudad">Ciudad Futurista</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="storyType">Tipo de Historia:</label>
+                <select id="storyType">
+                    <option value="aventura">Aventura</option>
+                    <option value="fantasia">Fantasía</option>
+                    <option value="misterio">Misterio</option>
+                    <option value="humor">Humor</option>
+                    <option value="amistad">Amistad</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="childName">Nombre del Niño:</label>
+                <input 
+                    type="text" 
+                    id="childName" 
+                    placeholder="María"
+                    value="María"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="childAge">Edad:</label>
+                <input 
+                    type="number" 
+                    id="childAge" 
+                    min="3" 
+                    max="12" 
+                    value="8"
+                >
+            </div>
+
+            <button type="submit" id="testButton">
+                🚀 Probar Conexión
+            </button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('testForm');
+        const resultDiv = document.getElementById('result');
+        const testButton = document.getElementById('testButton');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const webhookUrl = document.getElementById('webhookUrl').value;
+            const characters = document.getElementById('characters').value
+                .split(',')
+                .map(c => c.trim());
+            const setting = document.getElementById('setting').value;
+            const storyType = document.getElementById('storyType').value;
+            const childName = document.getElementById('childName').value;
+            const childAge = parseInt(document.getElementById('childAge').value);
+
+            // Mostrar loading
+            resultDiv.className = 'result loading';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <div class="loader"></div>
+                <p style="text-align: center;">Generando historia... Esto puede tomar 10-30 segundos.</p>
+            `;
+            testButton.disabled = true;
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        characters,
+                        setting,
+                        storyType,
+                        childName,
+                        childAge,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Mostrar resultado exitoso
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ ¡Conexión Exitosa!</h3>
+                    <p><strong>Estado:</strong> La conexión con n8n funciona correctamente.</p>
+                    <div class="story-content">
+                        <div class="story-title">${data.title || 'Sin título'}</div>
+                        <p>${data.content || data.story || 'Sin contenido'}</p>
+                        ${data.imageUrl ? `<p><strong>Imagen:</strong> ${data.imageUrl}</p>` : ''}
+                        ${data.imagePrompt ? `<p><strong>Prompt de imagen:</strong> ${data.imagePrompt}</p>` : ''}
+                    </div>
+                    <p style="margin-top: 15px;"><strong>Respuesta completa:</strong></p>
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+
+            } catch (error) {
+                // Mostrar error
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Error de Conexión</h3>
+                    <p><strong>Mensaje:</strong> ${error.message}</p>
+                    <p><strong>Posibles causas:</strong></p>
+                    <ul>
+                        <li>La URL del webhook es incorrecta</li>
+                        <li>El workflow de n8n no está activo</li>
+                        <li>Hay un error en la configuración de n8n</li>
+                        <li>La API Key de OpenAI no es válida</li>
+                        <li>Problemas de CORS (prueba desde n8n directamente)</li>
+                    </ul>
+                    <p><strong>Solución:</strong></p>
+                    <ol>
+                        <li>Verifica que el workflow esté activo en n8n</li>
+                        <li>Copia la URL exacta del webhook</li>
+                        <li>Revisa los logs en n8n</li>
+                        <li>Prueba el workflow manualmente en n8n</li>
+                    </ol>
+                `;
+            } finally {
+                testButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

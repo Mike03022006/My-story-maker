@@ -1,0 +1,12 @@
+<div class="steps-indicator animate-fadeInUp">
+  <ng-container *ngFor="let s of steps; let i = index">
+    <div class="step"
+      [class.active]="currentStep >= s"
+      [class.done]="currentStep > s">
+      <span>{{ s === 4 ? '🔒' : s }}</span>
+    </div>
+    <div class="step-line" *ngIf="i < steps.length - 1"
+      [class.done]="currentStep > s">
+    </div>
+  </ng-container>
+</div>

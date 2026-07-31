@@ -1,17 +1,72 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="profile-setup-content">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <div class="setup-wrapper">
+
+    <!-- HEADER -->
+    <div class="setup-header animate-fadeInUp">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 *ngIf="!isEditMode">¡Hola! 👋</h1>
+          <h1 *ngIf="isEditMode">Editar Perfil ✏️</h1>
+          <p *ngIf="!isEditMode">Cuéntanos sobre ti para personalizar tus historias</p>
+          <p *ngIf="isEditMode">Cambia tu nombre o foto de perfil</p>
+        </div>
+        <button *ngIf="isEditMode" class="close-edit-btn" (click)="cancelEdit()">✕</button>
+      </div>
+    </div>
+
+    <!-- STEPS INDICATOR -->
+    <app-step-indicator
+      *ngIf="!isEditMode"
+      [currentStep]="currentStep">
+    </app-step-indicator>
+
+    <!-- STEP 1: Avatar -->
+    <app-step-avatar
+      *ngIf="currentStep === 1"
+      [selectedAvatar]="selectedAvatar"
+      [profileName]="profileName"
+      [profileAge]="profileAge"
+      [isEditMode]="isEditMode"
+      [isSaving]="isSaving"
+      [error]="step1Error"
+      (avatarChange)="selectedAvatar = $event"
+      (nameChange)="profileName = $event"
+      (ageChange)="profileAge = $event"
+      (next)="nextStep()">
+    </app-step-avatar>
+
+    <!-- STEP 2: Intereses -->
+    <app-step-interests
+      *ngIf="currentStep === 2"
+      [selectedInterests]="selectedInterests"
+      [error]="step2Error"
+      (interestsChange)="selectedInterests = $event"
+      (next)="nextStep()"
+      (back)="prevStep()">
+    </app-step-interests>
+
+    <!-- STEP 3: Preview -->
+    <app-step-preview
+      *ngIf="currentStep === 3"
+      [selectedAvatar]="selectedAvatar"
+      [profileName]="profileName"
+      [profileAge]="profileAge"
+      [selectedInterests]="selectedInterests"
+      (next)="nextStep()"
+      (back)="prevStep()">
+    </app-step-preview>
+
+    <!-- STEP 4: Seguridad -->
+    <app-step-security
+      *ngIf="currentStep === 4"
+      [isSaving]="isSaving"
+      (save)="saveProfile($event)"
+      (back)="prevStep()">
+    </app-step-security>
+
+  </div>
 </ion-content>

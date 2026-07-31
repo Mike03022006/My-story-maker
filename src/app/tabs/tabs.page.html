@@ -1,20 +1,122 @@
-<ion-tabs>
+<ion-header class="app-header">
+  <ion-toolbar>
+    <div class="header-content">
+      <div class="header-left">
+        <span class="header-logo">📖</span>
+        <span class="header-title">Cuentos Mágicos</span>
+      </div>
+      <div class="header-right">
+        <!-- Candado global -->
+        <button class="lock-btn"
+          (click)="toggleLock()" [class.unlocked]="isUnlocked">
+          {{ isUnlocked ? '🔓' : '🔒' }}
+        </button>
+        <button class="avatar-btn" (click)="toggleProfilePanel()">
+          <span *ngIf="isEmojiAvatar(profile?.avatar)" class="header-avatar-emoji">{{ profile?.avatar }}</span>
+          <img *ngIf="!isEmojiAvatar(profile?.avatar) && profile?.avatar" [src]="profile?.avatar" class="header-avatar-img" />
+          <span *ngIf="!profile?.avatar" class="header-avatar-emoji">👤</span>
+        </button>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
 
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="tab1" href="/tabs/tab1">
-      <ion-icon aria-hidden="true" name="triangle"></ion-icon>
-      <ion-label>Tab 1</ion-label>
-    </ion-tab-button>
+<!-- Panel overlay -->
+<div class="panel-overlay" [class.visible]="showProfilePanel" (click)="closeProfilePanel()"></div>
 
-    <ion-tab-button tab="tab2" href="/tabs/tab2">
-      <ion-icon aria-hidden="true" name="ellipse"></ion-icon>
-      <ion-label>Tab 2</ion-label>
-    </ion-tab-button>
+<!-- Profile Side Panel -->
+<div class="profile-panel" [class.open]="showProfilePanel">
 
-    <ion-tab-button tab="tab3" href="/tabs/tab3">
-      <ion-icon aria-hidden="true" name="square"></ion-icon>
-      <ion-label>Tab 3</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
+  <div class="panel-header">
+    <div class="panel-avatar-wrap">
+      <span *ngIf="isEmojiAvatar(profile?.avatar)" class="panel-avatar-emoji">{{ profile?.avatar }}</span>
+      <img *ngIf="!isEmojiAvatar(profile?.avatar) && profile?.avatar" [src]="profile?.avatar" class="panel-avatar-img" />
+    </div>
+    <div class="panel-user-info">
+      <h3>{{ profile?.name }}</h3>
+      <p>{{ profile?.age }} años</p>
+    </div>
+    <button class="panel-close" (click)="closeProfilePanel()">✕</button>
+  </div>
 
-</ion-tabs>
+  <div class="panel-body">
+
+    <button class="panel-action-btn" (click)="goToEditProfile()">
+      <span class="pa-icon">✏️</span>
+      <span>Editar Perfil</span>
+      <span class="pa-arrow">›</span>
+    </button>
+
+    <button class="panel-action-btn" (click)="goToSubscription()">
+      <span class="pa-icon">✨</span>
+      <span>Planes de Suscripción</span>
+      <span class="pa-arrow">›</span>
+    </button>
+
+    <div class="panel-section">
+      <div class="section-header" (click)="toggleInterests()">
+        <span class="section-title"><span>🎨</span> Gustos</span>
+        <button class="plus-btn" [class.open]="showInterests">+</button>
+      </div>
+
+      <div class="interests-list" *ngIf="showInterests">
+        <div *ngFor="let id of profile?.interests" class="interest-item"
+          (click)="selectInterestForDelete(id)">
+          <span class="interest-icon">{{ getInterestIcon(id) }}</span>
+          <span class="interest-label">{{ getInterestLabel(id) }}</span>
+          <button class="delete-interest-btn" *ngIf="selectedInterestToDelete === id"
+            (click)="confirmDeleteInterest(id, $event)">🗑️ Borrar</button>
+        </div>
+        <button class="add-interest-btn" (click)="showAddInterests = !showAddInterests">+ Agregar gusto</button>
+        <div class="add-interests-dropdown" *ngIf="showAddInterests">
+          <div *ngFor="let interest of availableToAdd" class="add-interest-option"
+            (click)="addInterest(interest.id)">
+            <span>{{ interest.icon }}</span>
+            <span>{{ interest.label }}</span>
+          </div>
+          <p class="no-more" *ngIf="availableToAdd.length === 0">¡Ya tienes todos los gustos! 🎉</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-action-btn" style="cursor: default;">
+      <span class="pa-icon">{{ isDarkMode ? '☀️' : '🌙' }}</span>
+      <span>Modo Oscuro</span>
+      <span class="pa-arrow" style="display: flex; align-items: center;">
+         <ion-toggle [checked]="isDarkMode" (ionChange)="toggleDarkMode()"></ion-toggle>
+      </span>
+    </div>
+
+    <button class="panel-action-btn" (click)="goToVoiceSettings()">
+      <span class="pa-icon">🔊</span>
+      <span>Configuración de Voz</span>
+      <span class="pa-arrow">›</span>
+    </button>
+
+    <button class="panel-action-btn logout-btn" (click)="onLogout()">
+      <span class="pa-icon">🚪</span>
+      <span>Cerrar Sesión</span>
+      <span class="pa-arrow">›</span>
+    </button>
+
+    <button class="panel-action-btn delete-btn" (click)="confirmDeleteProfile()">
+      <span class="pa-icon">🗑️</span>
+      <span>Eliminar Perfil</span>
+      <span class="pa-arrow">›</span>
+    </button>
+
+  </div>
+</div>
+
+<ion-content class="tabs-content">
+  <ion-router-outlet></ion-router-outlet>
+</ion-content>
+
+<!-- Modal de Desbloqueo -->
+<app-lock-modal
+  *ngIf="showLockModal"
+  [securityMethod]="securityMethod"
+  [securityQuestion]="securityQuestion"
+  (unlocked)="onUnlocked()"
+  (close)="showLockModal = false">
+</app-lock-modal>

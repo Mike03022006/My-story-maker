@@ -1,17 +1,146 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 1
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true" class="login-content">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 1</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- Background decorations -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
 
-  <app-explore-container name="Tab 1 page"></app-explore-container>
+  <!-- Floating emojis -->
+  <div class="floating-emojis">
+    <span class="emoji e1">📚</span>
+    <span class="emoji e2">⭐</span>
+    <span class="emoji e3">🌙</span>
+    <span class="emoji e4">🦋</span>
+    <span class="emoji e5">✨</span>
+  </div>
+
+  <div class="login-wrapper">
+
+    <!-- Header -->
+    <div class="login-header animate-fadeInUp">
+      <div class="logo-wrap">
+        <span class="logo-icon">📖</span>
+      </div>
+      <h1 class="app-title">Cuentos Mágicos</h1>
+      <p class="app-subtitle">¡Historias que vuelan con tu imaginación!</p>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card animate-fadeInUp" style="animation-delay:0.1s">
+
+      <div class="tab-switcher">
+        <button [class.active]="activeTab === 'login'" (click)="setTab('login')">Entrar</button>
+        <button [class.active]="activeTab === 'register'" (click)="setTab('register')">Registro</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form *ngIf="activeTab === 'login'" class="auth-form" (ngSubmit)="onLogin()">
+        <div class="field-group">
+          <label>Correo electrónico</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input
+              type="email"
+              [(ngModel)]="loginEmail"
+              name="loginEmail"
+              placeholder="tu@correo.com"
+              class="input-field"
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Contraseña</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="loginPassword"
+              name="loginPassword"
+              placeholder="••••••••"
+              class="input-field"
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="error-msg" *ngIf="loginError">
+          <span>⚠️</span> {{ loginError }}
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="!isLoading">✨ Iniciar Sesión</span>
+          <ion-spinner *ngIf="isLoading" name="crescent" color="light"></ion-spinner>
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form *ngIf="activeTab === 'register'" class="auth-form" (ngSubmit)="onRegister()">
+        <div class="field-group">
+          <label>Correo electrónico</label>
+          <div class="input-wrap">
+            <span class="input-icon">📧</span>
+            <input
+              type="email"
+              [(ngModel)]="regEmail"
+              name="regEmail"
+              placeholder="tu@correo.com"
+              class="input-field"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Contraseña</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="regPassword"
+              name="regPassword"
+              placeholder="Mínimo 6 caracteres"
+              class="input-field"
+            />
+            <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Confirmar contraseña</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔐</span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="regConfirm"
+              name="regConfirm"
+              placeholder="Repite tu contraseña"
+              class="input-field"
+            />
+          </div>
+        </div>
+
+        <div class="error-msg" *ngIf="registerError">
+          <span>⚠️</span> {{ registerError }}
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="!isLoading">🚀 Crear Cuenta</span>
+          <ion-spinner *ngIf="isLoading" name="crescent" color="light"></ion-spinner>
+        </button>
+      </form>
+
+    </div>
+
+    <!-- Footer -->
+    <p class="footer-text animate-fadeInUp" style="animation-delay:0.2s">
+      Con ❤️ para los pequeños lectores 🌟
+    </p>
+
+  </div>
 </ion-content>

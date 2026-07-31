@@ -1,0 +1,115 @@
+{
+  "name": "Generador de Historias Infantiles - Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-story",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "generate-story"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyDKa72qzcB8rP_xGjiUYxcqYVZtJQZFvW0",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"Eres un escritor experto en cuentos infantiles. Creas historias mágicas, educativas y apropiadas para niños.\\n\\nCrea una historia infantil con estos detalles:\\n\\nPersonajes: {{ $json.body.characters.join(', ') }}\\nLugar: {{ $json.body.setting }}\\nTipo: {{ $json.body.storyType }}\\nNombre del niño: {{ $json.body.childName }}\\nEdad: {{ $json.body.childAge }} años\\n\\nRequisitos:\\n1. Historia apropiada para niños de {{ $json.body.childAge }} años\\n2. Longitud: 300-500 palabras\\n3. Mensaje positivo y educativo\\n4. Incluye diálogos\\n5. Final feliz\\n\\nResponde ÚNICAMENTE con este formato JSON (sin markdown, sin ```json):\\n{\\n  \\\"title\\\": \\\"Título atractivo de la historia\\\",\\n  \\\"story\\\": \\\"Historia completa con inicio, desarrollo y final\\\",\\n  \\\"imagePrompt\\\": \\\"Descripción detallada de una escena para generar imagen\\\"\\n}\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.8,\n    \"maxOutputTokens\": 2048\n  }\n}",
+        "options": {}
+      },
+      "name": "Google Gemini API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener respuesta de Gemini\nconst response = $input.first().json;\n\nconsole.log('📥 Respuesta de Gemini:', JSON.stringify(response, null, 2));\n\n// Extraer el contenido del mensaje\nlet content = '';\nif (response.candidates && response.candidates[0] && response.candidates[0].content && response.candidates[0].content.parts) {\n  content = response.candidates[0].content.parts[0].text;\n} else {\n  throw new Error('Respuesta de Gemini inválida');\n}\n\nconsole.log('📄 Contenido:', content);\n\n// Parsear JSON\nlet storyData;\ntry {\n  // Limpiar la respuesta de posibles markdown\n  const cleanResponse = content\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  console.log('🧹 Respuesta limpia:', cleanResponse);\n  \n  storyData = JSON.parse(cleanResponse);\n  \n  // Validar que tenga los campos necesarios\n  if (!storyData.title || !storyData.story) {\n    throw new Error('Respuesta incompleta de Gemini');\n  }\n  \n  console.log('✅ JSON parseado correctamente');\n  \n} catch (error) {\n  console.error('❌ Error al parsear JSON:', error.message);\n  console.error('📄 Respuesta original:', content);\n  \n  // Fallback: usar la respuesta como texto plano\n  storyData = {\n    title: \"Historia Mágica\",\n    story: content,\n    imagePrompt: \"Una escena mágica de un cuento infantil\"\n  };\n}\n\n// Retornar datos estructurados\nconst result = {\n  title: storyData.title,\n  content: storyData.story,\n  imagePrompt: storyData.imagePrompt || \"Una escena mágica de un cuento infantil\",\n  imageUrl: \"\",\n  timestamp: new Date().toISOString(),\n  success: true\n};\n\nconsole.log('📤 Respuesta final:', result);\n\nreturn { json: result };"
+      },
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Google Gemini API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini API": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

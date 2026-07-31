@@ -1,0 +1,64 @@
+<div class="step-card animate-fadeInUp">
+  <div class="step-title">
+    <span class="step-emoji">🧒</span>
+    <div>
+      <h2>Tu Perfil</h2>
+      <p>{{ isEditMode ? 'Cambia tu foto o nombre' : 'Elige tu foto, nombre y edad' }}</p>
+    </div>
+  </div>
+
+  <!-- Avatar -->
+  <div class="avatar-section">
+    <div class="current-avatar" (click)="openAvatarPicker()">
+      <span *ngIf="isEmojiAvatar(selectedAvatar)" class="emoji-avatar-big">{{ selectedAvatar || '👤' }}</span>
+      <img *ngIf="!isEmojiAvatar(selectedAvatar) && selectedAvatar" [src]="selectedAvatar" class="avatar-img" />
+      <span *ngIf="!selectedAvatar" class="avatar-placeholder">👤</span>
+      <div class="avatar-edit-badge">📷</div>
+    </div>
+    <p class="avatar-hint">Toca para cambiar foto</p>
+  </div>
+
+  <div class="avatar-source-btns" *ngIf="showAvatarPicker">
+    <button class="source-btn" (click)="pickFromCamera()"><span>📷</span> Cámara</button>
+    <button class="source-btn" (click)="pickFromGallery()"><span>🖼️</span> Galería</button>
+    <button class="source-btn" (click)="showGenericAvatars = !showGenericAvatars"><span>😊</span> Genérico</button>
+  </div>
+
+  <div class="generic-avatars" *ngIf="showGenericAvatars">
+    <button *ngFor="let av of genericAvatars" class="generic-av-btn"
+      [class.selected]="selectedAvatar === av.emoji"
+      (click)="selectGenericAvatar(av.emoji)">
+      {{ av.emoji }}
+    </button>
+  </div>
+
+  <!-- Nombre -->
+  <div class="field-group">
+    <label>¿Cómo te llamas?</label>
+    <div class="input-wrap">
+      <span class="input-icon">✏️</span>
+      <input type="text" [value]="profileName" (input)="onNameInput($any($event.target).value)"
+        placeholder="Tu nombre o apodo" class="input-field" maxlength="20" />
+    </div>
+  </div>
+
+  <!-- Edad (solo en registro) -->
+  <div class="field-group" *ngIf="!isEditMode">
+    <label>¿Cuántos años tienes?</label>
+    <div class="age-selector">
+      <button class="age-btn" (click)="changeAge(-1)" [disabled]="profileAge <= 3">−</button>
+      <div class="age-display">
+        <span class="age-number">{{ profileAge }}</span>
+        <span class="age-label">años</span>
+      </div>
+      <button class="age-btn" (click)="changeAge(1)" [disabled]="profileAge >= 14">+</button>
+    </div>
+  </div>
+
+  <div class="error-msg" *ngIf="error">⚠️ {{ error }}</div>
+
+  <button class="btn-primary" (click)="next.emit()" [disabled]="isSaving">
+    <span *ngIf="!isSaving">{{ isEditMode ? '✅ Guardar cambios' : 'Siguiente →' }}</span>
+    <ion-spinner *ngIf="isSaving" name="crescent" color="light"></ion-spinner>
+  </button>
+</div>

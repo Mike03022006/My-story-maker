@@ -1,0 +1,101 @@
+{
+  "name": "Generador de Historias Infantiles",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-story",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "Eres un escritor experto en cuentos infantiles. Creas historias mágicas, educativas y apropiadas para niños."
+            },
+            {
+              "role": "user",
+              "message": "=Crea una historia infantil con estos detalles:\n\nPersonajes: {{ $json.body.characters.join(', ') }}\nLugar: {{ $json.body.setting }}\nTipo: {{ $json.body.storyType }}\nNombre del niño: {{ $json.body.childName }}\nEdad: {{ $json.body.childAge }} años\n\nRequisitos:\n1. Historia apropiada para niños de {{ $json.body.childAge }} años\n2. Longitud: 300-500 palabras\n3. Mensaje positivo y educativo\n4. Incluye diálogos\n5. Final feliz\n\nResponde en formato JSON:\n{\n  \"title\": \"Título atractivo\",\n  \"story\": \"Historia completa\",\n  \"imagePrompt\": \"Descripción detallada para generar imagen\"\n}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.8
+        }
+      },
+      "name": "OpenAI Chat",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener respuesta de ChatGPT\nconst chatResponse = $input.first().json.message.content;\n\n// Parsear JSON\nlet storyData;\ntry {\n  const cleanResponse = chatResponse\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  storyData = JSON.parse(cleanResponse);\n} catch (error) {\n  storyData = {\n    title: \"Historia Mágica\",\n    story: chatResponse,\n    imagePrompt: \"Una escena mágica de un cuento infantil\"\n  };\n}\n\n// Retornar datos estructurados\nreturn {\n  json: {\n    title: storyData.title,\n    content: storyData.story,\n    imagePrompt: storyData.imagePrompt,\n    imageUrl: \"\",\n    timestamp: new Date().toISOString(),\n    success: true\n  }\n};"
+      },
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

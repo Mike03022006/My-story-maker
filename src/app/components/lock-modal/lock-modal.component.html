@@ -1,0 +1,59 @@
+<div class="overlay" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- ❌ cerrar -->
+    <button class="close-btn" (click)="closeModal()">✕</button>
+
+    <h2>Desbloquear</h2>
+
+    <!-- ⛔ BLOQUEADO -->
+    <div *ngIf="isBlocked" class="blocked">
+      Demasiados intentos
+      <p>Intenta en {{ remainingTime }}s</p>
+    </div>
+
+    <!-- 🔓 CONTENIDO -->
+    <div *ngIf="!isBlocked">
+
+      <!-- PIN -->
+      <div *ngIf="securityMethod === 'pin'">
+        <p>Digite su PIN</p>
+        <input type="password" [(ngModel)]="lockInput" />
+      </div>
+
+      <!-- PATRÓN -->
+      <div *ngIf="securityMethod === 'pattern'">
+        <p>Dibuja tu patrón</p>
+
+        <div class="pattern-grid">
+          <div *ngFor="let p of [1,2,3,4,5,6,7,8,9]" (click)="selectPatternPoint(p)"
+            [class.active]="isPatternPointActive(p)">
+            {{ getPatternOrder(p) || '' }}
+          </div>
+        </div>
+
+        <button (click)="resetPattern()">Reiniciar</button>
+      </div>
+
+      <!-- PREGUNTA -->
+      <div *ngIf="securityMethod === 'question'">
+        <p>{{ securityQuestion }}</p>
+        <input type="text" [(ngModel)]="lockInput" />
+      </div>
+
+      <!-- ERROR -->
+      <p class="error" *ngIf="lockError">{{ lockError }}</p>
+
+      <!-- BOTÓN -->
+      <button class="btn-primary" (click)="verifyAndUnlock()" [disabled]="isVerifying">
+        {{ isVerifying ? 'Verificando...' : 'Desbloquear' }}
+      </button>
+
+      <button class="forgot" (click)="forgotSecurity()">
+        ¿Olvidaste tu clave?
+      </button>
+
+    </div>
+
+  </div>
+</div>

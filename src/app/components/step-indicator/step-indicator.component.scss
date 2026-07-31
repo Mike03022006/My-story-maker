@@ -1,0 +1,42 @@
+.steps-indicator {
+  display: flex;
+  align-items: center;
+
+  .step {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #DDD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    background: white;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+
+    &.active {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(255,107,107,0.12);
+    }
+
+    &.done {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+      span { display: none; }
+      &::after { content: '✓'; }
+    }
+  }
+
+  .step-line {
+    flex: 1;
+    height: 2.5px;
+    background: #EEE;
+    transition: background 0.3s ease;
+    &.done { background: var(--color-primary); }
+  }
+}

@@ -1,0 +1,359 @@
+.subscription-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 2rem;
+  
+  h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    font-size: 1.1rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border: 3px solid transparent;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.current {
+    border-color: var(--ion-color-success);
+    background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+  }
+  
+  &.recommended {
+    border-color: var(--ion-color-warning);
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  }
+}
+
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  background: var(--ion-color-success);
+  color: white;
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  
+  &.recommended-badge {
+    background: var(--ion-color-warning);
+  }
+}
+
+.plan-icon {
+  font-size: 4rem;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.plan-name {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--ion-color-dark);
+}
+
+.plan-price {
+  text-align: center;
+  margin-bottom: 1rem;
+  
+  .price-amount {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--ion-color-primary);
+  }
+  
+  .price-period {
+    font-size: 1rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+.plan-description {
+  text-align: center;
+  color: var(--ion-color-medium);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.plan-features {
+  margin-bottom: 1.5rem;
+  
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    
+    ion-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    
+    span {
+      font-size: 0.95rem;
+      color: var(--ion-color-dark);
+    }
+    
+    &.disabled {
+      opacity: 0.5;
+      
+      span {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+
+.plan-button {
+  margin-top: 1rem;
+}
+
+// Payment Modal
+.payment-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+}
+
+.payment-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--ion-color-primary);
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--ion-color-medium);
+    padding: 0.5rem;
+    
+    &:hover {
+      color: var(--ion-color-dark);
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.selected-plan-info {
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--ion-color-primary-tint) 0%, var(--ion-color-secondary-tint) 100%);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  
+  .plan-icon-large {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+    color: white;
+    margin: 0.5rem 0;
+  }
+  
+  .plan-price-large {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+  }
+}
+
+.payment-methods {
+  margin-bottom: 1.5rem;
+  
+  h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--ion-color-dark);
+  }
+}
+
+.payment-method-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-primary-tint);
+  }
+  
+  &.selected {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-primary-tint);
+  }
+  
+  .payment-icon {
+    font-size: 2.5rem;
+  }
+  
+  .payment-info {
+    flex: 1;
+    
+    h5 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.1rem;
+      color: var(--ion-color-dark);
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--ion-color-medium);
+    }
+  }
+  
+  ion-icon {
+    font-size: 1.5rem;
+  }
+}
+
+.payment-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f0f9ff;
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+  
+  ion-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ion-color-dark);
+  }
+}
+
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
+  
+  ion-button {
+    flex: 1;
+  }
+}
+
+// Modo oscuro
+@media (prefers-color-scheme: dark) {
+  .plan-card {
+    background: var(--ion-color-step-50);
+    
+    &.current {
+      background: linear-gradient(135deg, #1a3a1a 0%, var(--ion-color-step-50) 100%);
+    }
+    
+    &.recommended {
+      background: linear-gradient(135deg, #3a2a1a 0%, var(--ion-color-step-50) 100%);
+    }
+  }
+  
+  .payment-modal {
+    background: var(--ion-color-step-50);
+  }
+  
+  .modal-header {
+    border-bottom-color: var(--ion-color-step-100);
+  }
+  
+  .modal-footer {
+    border-top-color: var(--ion-color-step-100);
+  }
+  
+  .payment-method-card {
+    background: var(--ion-color-step-100);
+    border-color: var(--ion-color-step-150);
+  }
+  
+  .payment-note {
+    background: var(--ion-color-step-100);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-section h1 {
+    font-size: 1.5rem;
+  }
+}

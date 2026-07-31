@@ -1,0 +1,126 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="previousStep()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Crear Historia</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  
+  <!-- Progress Indicator -->
+  <div class="progress-container">
+    <div class="progress-step" [class.active]="step === 'characters'" [class.completed]="step !== 'characters'">
+      <div class="step-circle">1</div>
+      <div class="step-label">Personajes</div>
+    </div>
+    <div class="progress-line" [class.completed]="step !== 'characters'"></div>
+    <div class="progress-step" [class.active]="step === 'setting'" [class.completed]="step === 'type' || step === 'generating'">
+      <div class="step-circle">2</div>
+      <div class="step-label">Lugar</div>
+    </div>
+    <div class="progress-line" [class.completed]="step === 'type' || step === 'generating'"></div>
+    <div class="progress-step" [class.active]="step === 'type' || step === 'generating'">
+      <div class="step-circle">3</div>
+      <div class="step-label">Tipo</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Characters -->
+  <div *ngIf="step === 'characters'" class="step-content">
+    <h2 class="step-title">¿Quiénes serán los personajes?</h2>
+    <p class="step-subtitle">Elige hasta 3 personajes para tu historia</p>
+    
+    <div class="selection-grid">
+      <div 
+        *ngFor="let character of availableCharacters" 
+        class="selection-card"
+        [class.selected]="isCharacterSelected(character.id)"
+        (click)="toggleCharacter(character.id)">
+        <div class="card-emoji">{{ character.emoji }}</div>
+        <div class="card-name">{{ character.name }}</div>
+        <ion-icon 
+          *ngIf="isCharacterSelected(character.id)" 
+          name="checkmark-circle" 
+          class="check-icon">
+        </ion-icon>
+      </div>
+    </div>
+
+    <div class="selected-summary" *ngIf="selectedCharacters.length > 0">
+      <p>Seleccionados: {{ selectedCharacters.length }}/3</p>
+    </div>
+  </div>
+
+  <!-- Step 2: Setting -->
+  <div *ngIf="step === 'setting'" class="step-content">
+    <h2 class="step-title">¿Dónde sucederá la historia?</h2>
+    <p class="step-subtitle">Elige el lugar donde vivirán la aventura</p>
+    
+    <div class="selection-grid">
+      <div 
+        *ngFor="let setting of availableSettings" 
+        class="selection-card"
+        [class.selected]="selectedSetting === setting.id"
+        (click)="selectSetting(setting.id)">
+        <div class="card-emoji">{{ setting.emoji }}</div>
+        <div class="card-name">{{ setting.name }}</div>
+        <ion-icon 
+          *ngIf="selectedSetting === setting.id" 
+          name="checkmark-circle" 
+          class="check-icon">
+        </ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Story Type -->
+  <div *ngIf="step === 'type'" class="step-content">
+    <h2 class="step-title">¿Qué tipo de historia quieres?</h2>
+    <p class="step-subtitle">Elige el tema de tu historia</p>
+    
+    <div class="type-list">
+      <div 
+        *ngFor="let type of storyTypes" 
+        class="type-card"
+        [class.selected]="selectedType === type.id"
+        (click)="selectType(type.id)">
+        <div class="type-emoji">{{ type.emoji }}</div>
+        <div class="type-info">
+          <div class="type-name">{{ type.name }}</div>
+          <div class="type-description">{{ type.description }}</div>
+        </div>
+        <ion-icon 
+          *ngIf="selectedType === type.id" 
+          name="checkmark-circle" 
+          class="check-icon">
+        </ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generating State -->
+  <div *ngIf="step === 'generating'" class="generating-content">
+    <div class="generating-animation">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+    <h2 class="generating-title">Creando tu historia...</h2>
+    <p class="generating-text">Estamos preparando una aventura especial para ti ✨</p>
+  </div>
+
+  <!-- Continue Button -->
+  <ion-button 
+    *ngIf="step !== 'generating'"
+    expand="block" 
+    size="large"
+    class="continue-button"
+    [disabled]="!canContinue() || isGenerating"
+    (click)="nextStep()">
+    <ion-spinner *ngIf="isGenerating && step === 'type'" name="crescent" slot="start"></ion-spinner>
+    {{ isGenerating && step === 'type' ? 'Creando...' : (step === 'type' ? '¡Crear Historia! 🎉' : 'Continuar') }}
+  </ion-button>
+
+</ion-content>

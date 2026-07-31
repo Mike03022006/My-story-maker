@@ -1,0 +1,27 @@
+<div class="step-card animate-fadeInUp">
+  <div class="step-title">
+    <span class="step-emoji">🎨</span>
+    <div>
+      <h2>Tus Gustos</h2>
+      <p>Elige lo que más te gusta (mínimo 3)</p>
+    </div>
+  </div>
+
+  <div class="interests-grid">
+    <button *ngFor="let interest of allInterests" class="interest-chip"
+      [class.selected]="selectedInterests.includes(interest.id)"
+      (click)="toggle(interest.id)">
+      <span class="chip-icon">{{ interest.icon }}</span>
+      <span class="chip-label">{{ interest.label }}</span>
+    </button>
+  </div>
+
+  <p class="selected-count">{{ selectedInterests.length }} seleccionados</p>
+
+  <div class="error-msg" *ngIf="error">⚠️ {{ error }}</div>
+
+  <div class="btn-row">
+    <button class="btn-back" (click)="back.emit()">← Atrás</button>
+    <button class="btn-primary" (click)="next.emit()">Siguiente →</button>
+  </div>
+</div>

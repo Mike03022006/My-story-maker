@@ -1,0 +1,29 @@
+<div class="step-card animate-fadeInUp">
+  <div class="step-title">
+    <span class="step-emoji">👀</span>
+    <div>
+      <h2>Confirma tu perfil</h2>
+      <p>¿Todo se ve bien?</p>
+    </div>
+  </div>
+
+  <div class="profile-preview">
+    <div class="preview-avatar">
+      <span *ngIf="isEmojiAvatar(selectedAvatar)" class="emoji-avatar-big">{{ selectedAvatar || '👤' }}</span>
+      <img *ngIf="!isEmojiAvatar(selectedAvatar) && selectedAvatar" [src]="selectedAvatar" class="preview-avatar-img" />
+      <span *ngIf="!selectedAvatar" class="emoji-avatar-big">👤</span>
+    </div>
+    <h3 class="preview-name">{{ profileName }}</h3>
+    <p class="preview-age">{{ profileAge }} años</p>
+    <div class="preview-interests">
+      <span *ngFor="let id of selectedInterests" class="preview-chip">
+        {{ getInterestIcon(id) }} {{ getInterestLabel(id) }}
+      </span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-back" (click)="back.emit()">← Atrás</button>
+    <button class="btn-primary" (click)="next.emit()">Siguiente →</button>
+  </div>
+</div>

@@ -1,0 +1,212 @@
+{
+  "name": "Generador de Historias Infantiles - Mejorado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-story",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [250, 300],
+      "webhookId": "generate-story"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validar datos de entrada\nconst body = $input.first().json.body;\n\nif (!body) {\n  throw new Error('No se recibieron datos');\n}\n\nif (!body.characters || !Array.isArray(body.characters) || body.characters.length === 0) {\n  throw new Error('Debe incluir al menos un personaje');\n}\n\nif (!body.setting) {\n  throw new Error('Debe incluir un lugar');\n}\n\nif (!body.storyType) {\n  throw new Error('Debe incluir un tipo de historia');\n}\n\n// Preparar datos validados\nreturn {\n  json: {\n    characters: body.characters,\n    setting: body.setting,\n    storyType: body.storyType,\n    childName: body.childName || 'el niño',\n    childAge: body.childAge || 8,\n    timestamp: body.timestamp || new Date().toISOString()\n  }\n};"
+      },
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "message": "Eres un escritor experto en cuentos infantiles. Creas historias mágicas, educativas y apropiadas para niños. IMPORTANTE: Debes responder SIEMPRE en formato JSON válido."
+            },
+            {
+              "role": "user",
+              "message": "=Crea una historia infantil con estos detalles:\n\nPersonajes: {{ $json.characters.join(', ') }}\nLugar: {{ $json.setting }}\nTipo: {{ $json.storyType }}\nNombre del niño: {{ $json.childName }}\nEdad: {{ $json.childAge }} años\n\nRequisitos:\n1. Historia apropiada para niños de {{ $json.childAge }} años\n2. Longitud: 300-500 palabras\n3. Mensaje positivo y educativo\n4. Incluye diálogos\n5. Final feliz\n\nResponde ÚNICAMENTE con este formato JSON (sin markdown, sin ```json):\n{\n  \"title\": \"Título atractivo de la historia\",\n  \"story\": \"Historia completa con inicio, desarrollo y final\",\n  \"imagePrompt\": \"Descripción detallada de una escena para generar imagen\"\n}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.8,
+          "maxTokens": 1500
+        }
+      },
+      "name": "OpenAI Chat",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.3,
+      "position": [650, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener respuesta de ChatGPT\nconst chatResponse = $input.first().json.message.content;\n\nconsole.log('📥 Respuesta de OpenAI:', chatResponse);\n\n// Parsear JSON\nlet storyData;\ntry {\n  // Limpiar la respuesta de posibles markdown\n  const cleanResponse = chatResponse\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  console.log('🧹 Respuesta limpia:', cleanResponse);\n  \n  storyData = JSON.parse(cleanResponse);\n  \n  // Validar que tenga los campos necesarios\n  if (!storyData.title || !storyData.story) {\n    throw new Error('Respuesta incompleta de OpenAI');\n  }\n  \n  console.log('✅ JSON parseado correctamente');\n  \n} catch (error) {\n  console.error('❌ Error al parsear JSON:', error.message);\n  console.error('📄 Respuesta original:', chatResponse);\n  \n  // Fallback: usar la respuesta como texto plano\n  storyData = {\n    title: \"Historia Mágica\",\n    story: chatResponse,\n    imagePrompt: \"Una escena mágica de un cuento infantil\"\n  };\n}\n\n// Retornar datos estructurados\nconst result = {\n  title: storyData.title,\n  content: storyData.story,\n  imagePrompt: storyData.imagePrompt || \"Una escena mágica de un cuento infantil\",\n  imageUrl: \"\",\n  timestamp: new Date().toISOString(),\n  success: true\n};\n\nconsole.log('📤 Respuesta final:', result);\n\nreturn { json: result };"
+      },
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Capturar el error\nconst error = $input.first().json.error || {};\nconst errorMessage = error.message || 'Error desconocido';\n\nconsole.error('🚨 Error en el workflow:', errorMessage);\nconsole.error('📦 Error completo:', JSON.stringify(error, null, 2));\n\n// Determinar el tipo de error\nlet userMessage = 'Error al generar la historia';\nlet errorType = 'unknown';\n\nif (errorMessage.includes('API key')) {\n  userMessage = 'Error con la API Key de OpenAI';\n  errorType = 'api_key';\n} else if (errorMessage.includes('quota') || errorMessage.includes('insufficient_quota')) {\n  userMessage = 'Créditos de OpenAI agotados';\n  errorType = 'quota';\n} else if (errorMessage.includes('rate limit')) {\n  userMessage = 'Demasiadas peticiones a OpenAI';\n  errorType = 'rate_limit';\n} else if (errorMessage.includes('timeout')) {\n  userMessage = 'Tiempo de espera agotado';\n  errorType = 'timeout';\n}\n\nreturn {\n  json: {\n    success: false,\n    error: true,\n    message: userMessage,\n    errorType: errorType,\n    details: errorMessage,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 500]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Error": {
+      "main": [
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

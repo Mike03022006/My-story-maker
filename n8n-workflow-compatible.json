@@ -1,0 +1,126 @@
+{
+  "name": "Generador de Historias Infantiles - Compatible",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-story",
+        "responseMode": "lastNode",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "generate-story"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-3.5-turbo\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres un escritor experto en cuentos infantiles. Creas historias mágicas, educativas y apropiadas para niños. IMPORTANTE: Debes responder SIEMPRE en formato JSON válido.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Crea una historia infantil con estos detalles:\\n\\nPersonajes: {{ $json.body.characters.join(', ') }}\\nLugar: {{ $json.body.setting }}\\nTipo: {{ $json.body.storyType }}\\nNombre del niño: {{ $json.body.childName }}\\nEdad: {{ $json.body.childAge }} años\\n\\nRequisitos:\\n1. Historia apropiada para niños de {{ $json.body.childAge }} años\\n2. Longitud: 300-500 palabras\\n3. Mensaje positivo y educativo\\n4. Incluye diálogos\\n5. Final feliz\\n\\nResponde ÚNICAMENTE con este formato JSON (sin markdown, sin ```json):\\n{\\n  \\\"title\\\": \\\"Título atractivo de la historia\\\",\\n  \\\"story\\\": \\\"Historia completa con inicio, desarrollo y final\\\",\\n  \\\"imagePrompt\\\": \\\"Descripción detallada de una escena para generar imagen\\\"\\n}\"\n    }\n  ],\n  \"temperature\": 0.8,\n  \"max_tokens\": 1500\n}",
+        "options": {}
+      },
+      "name": "OpenAI API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener respuesta de OpenAI\nconst response = $input.first().json;\n\nconsole.log('📥 Respuesta de OpenAI:', JSON.stringify(response, null, 2));\n\n// Extraer el contenido del mensaje\nlet content = '';\nif (response.choices && response.choices[0] && response.choices[0].message) {\n  content = response.choices[0].message.content;\n} else {\n  throw new Error('Respuesta de OpenAI inválida');\n}\n\nconsole.log('📄 Contenido:', content);\n\n// Parsear JSON\nlet storyData;\ntry {\n  // Limpiar la respuesta de posibles markdown\n  const cleanResponse = content\n    .replace(/```json\\n?/g, '')\n    .replace(/```\\n?/g, '')\n    .trim();\n  \n  console.log('🧹 Respuesta limpia:', cleanResponse);\n  \n  storyData = JSON.parse(cleanResponse);\n  \n  // Validar que tenga los campos necesarios\n  if (!storyData.title || !storyData.story) {\n    throw new Error('Respuesta incompleta de OpenAI');\n  }\n  \n  console.log('✅ JSON parseado correctamente');\n  \n} catch (error) {\n  console.error('❌ Error al parsear JSON:', error.message);\n  console.error('📄 Respuesta original:', content);\n  \n  // Fallback: usar la respuesta como texto plano\n  storyData = {\n    title: \"Historia Mágica\",\n    story: content,\n    imagePrompt: \"Una escena mágica de un cuento infantil\"\n  };\n}\n\n// Retornar datos estructurados\nconst result = {\n  title: storyData.title,\n  content: storyData.story,\n  imagePrompt: storyData.imagePrompt || \"Una escena mágica de un cuento infantil\",\n  imageUrl: \"\",\n  timestamp: new Date().toISOString(),\n  success: true\n};\n\nconsole.log('📤 Respuesta final:', result);\n\nreturn { json: result };"
+      },
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "OpenAI API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI API Call": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

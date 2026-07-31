@@ -1,0 +1,108 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ story?.title || 'Historia' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleReading()" *ngIf="story && !isTemporary">
+        <ion-icon [name]="isReading ? 'stop-circle' : 'volume-high'" [color]="isReading ? 'danger' : 'light'"></ion-icon>
+      </ion-button>
+      <ion-button (click)="toggleFavorite()" *ngIf="story && !isTemporary">
+        <ion-icon [name]="story.isFavorite ? 'star' : 'star-outline'" [color]="story.isFavorite ? 'warning' : ''"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando historia...</p>
+  </div>
+
+  <!-- Historia -->
+  <div *ngIf="!loading && story" class="story-container">
+    
+    <!-- Banner de upgrade para historias temporales -->
+    <ion-card *ngIf="isTemporary" color="warning" class="upgrade-banner">
+      <ion-card-content>
+        <div class="banner-content">
+          <ion-icon name="lock-closed" class="banner-icon"></ion-icon>
+          <div class="banner-text">
+            <h3>Historia temporal</h3>
+            <p>Esta historia no se guardará. Actualiza a un plan de pago para guardar tus historias.</p>
+          </div>
+          <ion-button size="small" color="light" routerLink="/subscription">
+            Ver Planes
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Portada -->
+    <div class="story-cover">
+      <div class="cover-emoji">{{ story.cover }}</div>
+      <h1 class="story-title">{{ story.title }}</h1>
+      
+      <!-- Metadatos -->
+      <div class="story-meta" *ngIf="story.isAIGenerated">
+        <ion-chip color="secondary" *ngIf="story.characters && story.characters.length > 0">
+          <ion-icon name="people"></ion-icon>
+          <ion-label>{{ story.characters.join(', ') }}</ion-label>
+        </ion-chip>
+        <ion-chip color="tertiary" *ngIf="story.setting">
+          <ion-icon name="location"></ion-icon>
+          <ion-label>{{ story.setting }}</ion-label>
+        </ion-chip>
+        <ion-chip color="success">
+          <ion-icon name="sparkles"></ion-icon>
+          <ion-label>Creada con IA</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+
+    <!-- Contenido de la historia -->
+    <div class="story-content">
+      <p *ngFor="let paragraph of story.content.split('\n\n')" class="story-paragraph">
+        {{ paragraph }}
+      </p>
+    </div>
+
+    <!-- Imagen generada (si existe) -->
+    <div class="story-image" *ngIf="story.imageUrl">
+      <img 
+        [src]="story.imageUrl" 
+        [alt]="story.title"
+        (error)="onImageError($event)"
+        (load)="onImageLoad($event)" />
+      <div class="image-loading" *ngIf="imageLoading">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando imagen mágica...</p>
+      </div>
+    </div>
+
+    <!-- Botón de acción -->
+    <div class="story-actions">
+      <ion-button expand="block" [color]="isReading ? 'danger' : 'success'" (click)="toggleReading()" size="large" *ngIf="!isTemporary">
+        <ion-icon [name]="isReading ? 'stop-circle' : 'volume-high'" slot="start"></ion-icon>
+        {{ isReading ? 'Detener lectura' : '🔊 Escuchar historia' }}
+      </ion-button>
+      
+      <ion-button expand="block" color="primary" (click)="goBack()" fill="outline">
+        <ion-icon name="book" slot="start"></ion-icon>
+        Ver más historias
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- No encontrada -->
+  <div *ngIf="!loading && !story" class="not-found">
+    <ion-icon name="sad-outline" color="medium"></ion-icon>
+    <h2>Historia no encontrada</h2>
+    <ion-button (click)="goBack()">Volver</ion-button>
+  </div>
+</ion-content>

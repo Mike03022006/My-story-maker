@@ -1,17 +1,149 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="dashboard-content">
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- Header con saludo y candado -->
+  <div class="dash-header">
+    <div class="header-left">
+      <h2>¡Hola, <span class="name-highlight">{{ profile?.name }}</span>! 👋</h2>
+      <p>¿Qué historia leeremos hoy?</p>
+    </div>
+    <div class="header-right">
+      <ion-chip [color]="getPlanColor()" class="plan-chip" (click)="goToSubscription()">
+        <ion-icon [name]="getPlanIcon()"></ion-icon>
+        <ion-label>{{ getPlanName() }}</ion-label>
+      </ion-chip>
+    </div>
+  </div>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+  <div class="dashboard-wrapper">
+
+    <!-- Favoritos -->
+    <div class="section-block" *ngIf="favorites.length > 0">
+      <div class="section-header">
+        <h3>⭐ Favoritos</h3>
+        <span class="section-count">{{ favorites.length }}</span>
+      </div>
+      <div class="favorites-strip">
+        <div *ngFor="let story of favorites" class="fav-chip" (click)="selectStory(story)">
+          <span class="fav-cover">{{ story.cover }}</span>
+          <span class="fav-title">{{ story.title }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recomendados -->
+    <div class="section-block" *ngIf="recommended.length > 0">
+      <div class="section-header"><h3>✨ Para ti</h3></div>
+      <div class="stories-horizontal">
+        <div *ngFor="let story of recommended" class="story-card-h" (click)="selectStory(story)">
+          <div class="story-cover-h">{{ story.cover }}</div>
+          <div class="story-info-h">
+            <span class="story-title-h">{{ story.title }}</span>
+            <span class="story-genre">{{ getGenreLabel(story.genre) }}</span>
+          </div>
+          <span class="fav-star" *ngIf="story.isFavorite">⭐</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Todas las historias -->
+    <div class="section-block">
+      <div class="section-header">
+        <h3>📖 Mis Historias</h3>
+        <span class="section-count">{{ allStories.length }}</span>
+      </div>
+
+      <div class="stories-grid" *ngIf="allStories.length > 0">
+        <div *ngFor="let story of allStories" class="story-card"
+          [class.selected]="selectedStory?.id === story.id"
+          (click)="selectStory(story)">
+          <div class="story-cover">{{ story.cover }}</div>
+          <div class="story-meta">
+            <h4 class="story-title">{{ story.title }}</h4>
+            <span class="story-badge">{{ getGenreLabel(story.genre) }}</span>
+          </div>
+          <span class="fav-indicator" *ngIf="story.isFavorite">⭐</span>
+
+          <div class="story-actions" *ngIf="selectedStory?.id === story.id" (click)="$event.stopPropagation()">
+            <button class="action-btn read-btn" (click)="readStory(story)">📖 Leer</button>
+            <button class="action-btn image-btn" (click)="viewImage(story)" *ngIf="story.imageUrl">🖼️ Ver imagen</button>
+            <button class="action-btn fav-btn" [class.active]="story.isFavorite" (click)="toggleFavorite(story)">
+              {{ story.isFavorite ? '⭐' : '☆' }} {{ story.isFavorite ? 'Guardado' : 'Favorito' }}
+            </button>
+            <button class="action-btn del-btn" (click)="confirmDelete(story)">
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="allStories.length === 0">
+        <span class="empty-emoji">📭</span>
+        <p>Aún no tienes historias.</p>
+      </div>
+    </div>
+
+    <div style="height: 80px"></div>
+  </div>
+
+  <!-- Floating Action Button para crear historia -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="createNewStory()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- Modal lectura -->
+  <div class="read-overlay" *ngIf="readingStory" (click)="closeReading()">
+    <div class="read-modal" (click)="$event.stopPropagation()">
+      <div class="read-header">
+        <span class="read-cover">{{ readingStory.cover }}</span>
+        <div>
+          <h3>{{ readingStory.title }}</h3>
+          <span class="story-badge">{{ getGenreLabel(readingStory.genre) }}</span>
+        </div>
+        <button class="read-close" (click)="closeReading()">✕</button>
+      </div>
+      <div class="read-content">
+        <p>{{ readingStory.content }}</p>
+      </div>
+      <div class="read-footer">
+        <button class="btn-primary" (click)="toggleFavorite(readingStory)">
+          {{ readingStory.isFavorite ? '⭐ En favoritos' : '☆ Guardar favorito' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal aviso modo seguro -->
+  <div class="overlay" *ngIf="showSafeModeWarning">
+    <div class="warning-modal">
+      <span class="warning-icon">🔒</span>
+      <h3>Modo seguro</h3>
+      <p>Al entrar a leer, el acceso completo se cerrará automáticamente.</p>
+      <div class="warning-actions">
+        <button class="btn-back" (click)="cancelSafeMode()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmSafeModeAndRead()">Entendido, leer 📖</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de imagen -->
+  <div class="image-overlay" *ngIf="viewingImage" (click)="closeImageModal()">
+    <div class="image-modal" (click)="$event.stopPropagation()">
+      <div class="image-modal-header">
+        <h3>{{ viewingImage.title }}</h3>
+        <button class="image-close" (click)="closeImageModal()">✕</button>
+      </div>
+      <div class="image-modal-content">
+        <img [src]="viewingImage.imageUrl" [alt]="viewingImage.title" />
+      </div>
+      <div class="image-modal-footer">
+        <button class="btn-primary" (click)="readStory(viewingImage); closeImageModal()">
+          📖 Leer historia
+        </button>
+      </div>
+    </div>
+  </div>
+
+
 </ion-content>

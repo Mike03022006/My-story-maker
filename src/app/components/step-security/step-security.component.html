@@ -1,0 +1,145 @@
+<div class="step-card animate-fadeInUp">
+  <div class="step-title">
+    <span class="step-emoji">🔒</span>
+    <div>
+      <h2>Seguridad Parental</h2>
+      <p>Elige cómo proteger el acceso completo</p>
+    </div>
+  </div>
+
+  <!-- Selección de método -->
+  <div class="method-selector" *ngIf="!selectedMethod">
+    <button class="method-card" (click)="selectMethod('pin')">
+      <span class="method-icon">🔢</span>
+      <div class="method-info">
+        <strong>PIN de 4 dígitos</strong>
+        <span>Rápido y seguro</span>
+      </div>
+      <span class="method-arrow">→</span>
+    </button>
+
+    <button class="method-card" (click)="selectMethod('pattern')">
+      <span class="method-icon">🔵</span>
+      <div class="method-info">
+        <strong>Patrón de puntos</strong>
+        <span>Visual e intuitivo</span>
+      </div>
+      <span class="method-arrow">→</span>
+    </button>
+
+    <button class="method-card" (click)="selectMethod('question')">
+      <span class="method-icon">❓</span>
+      <div class="method-info">
+        <strong>Pregunta secreta</strong>
+        <span>Fácil de recordar</span>
+      </div>
+      <span class="method-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- ── PIN ── -->
+  <div *ngIf="selectedMethod === 'pin'" class="security-form">
+    <button class="change-method-btn" (click)="selectedMethod = null">← Cambiar método</button>
+    <h3 class="security-subtitle">🔢 Crear PIN</h3>
+    <div class="field-group">
+      <label>PIN de 4 dígitos</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔢</span>
+        <input type="password" inputmode="numeric" maxlength="4"
+          [(ngModel)]="pinValue" placeholder="••••" class="input-field pin-input" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Confirmar PIN</label>
+      <div class="input-wrap">
+        <span class="input-icon">✅</span>
+        <input type="password" inputmode="numeric" maxlength="4"
+          [(ngModel)]="pinConfirm" placeholder="••••" class="input-field pin-input" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PATRÓN ── -->
+  <div *ngIf="selectedMethod === 'pattern'" class="security-form">
+    <button class="change-method-btn" (click)="selectedMethod = null">← Cambiar método</button>
+    <h3 class="security-subtitle">
+      🔵 {{ patternPhase === 'draw' ? 'Dibuja tu patrón' : 'Confirma tu patrón' }}
+    </h3>
+    <p class="pattern-hint">
+      {{ patternPhase === 'draw' ? 'Arrastra el dedo sobre los puntos' : 'Repite el patrón' }}
+    </p>
+
+    <div class="pattern-container"
+      (mousedown)="isDrawing = true"
+      (mouseup)="endPattern()"
+      (mouseleave)="endPattern()"
+      (mousemove)="movePattern($event)"
+      (touchstart)="isDrawing = true; $event.preventDefault()"
+      (touchmove)="movePattern($event); $event.preventDefault()"
+      (touchend)="endPattern()">
+
+      <svg class="pattern-lines" [attr.width]="260" [attr.height]="260">
+        <line *ngFor="let line of patternLines"
+          [attr.x1]="line.x1" [attr.y1]="line.y1"
+          [attr.x2]="line.x2" [attr.y2]="line.y2"
+          stroke="#FF6B6B" stroke-width="4" stroke-linecap="round" />
+      </svg>
+
+      <div class="pattern-grid">
+        <button *ngFor="let point of [1,2,3,4,5,6,7,8,9]"
+          class="pattern-dot"
+          [attr.data-point]="point"
+          [class.active]="isPointActive(point)"
+          (mousedown)="startPattern(point, $event)"
+          (touchstart)="startPattern(point, $event); $event.preventDefault()">
+          <span *ngIf="isPointActive(point)" class="dot-order">{{ getPointOrder(point) }}</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pattern-actions">
+      <button class="btn-reset" (click)="resetPattern()">🔄 Borrar</button>
+      <button class="btn-confirm-pattern" *ngIf="patternPhase === 'draw'" (click)="confirmPattern()">
+        Confirmar →
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PREGUNTA SECRETA ── -->
+  <div *ngIf="selectedMethod === 'question'" class="security-form">
+    <button class="change-method-btn" (click)="selectedMethod = null">← Cambiar método</button>
+    <h3 class="security-subtitle">❓ Pregunta Secreta</h3>
+    <div class="field-group">
+      <label>Tu pregunta secreta</label>
+      <div class="input-wrap">
+        <span class="input-icon">❓</span>
+        <input type="text" [(ngModel)]="securityQuestion"
+          placeholder="Ej: ¿Nombre de tu mascota?" class="input-field" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Respuesta</label>
+      <div class="input-wrap">
+        <span class="input-icon">💬</span>
+        <input type="text" [(ngModel)]="securityAnswer" placeholder="Tu respuesta" class="input-field" />
+      </div>
+    </div>
+    <div class="field-group">
+      <label>Confirmar respuesta</label>
+      <div class="input-wrap">
+        <span class="input-icon">✅</span>
+        <input type="text" [(ngModel)]="securityAnswerConfirm" placeholder="Repite la respuesta" class="input-field" />
+      </div>
+    </div>
+  </div>
+
+  <div class="error-msg" *ngIf="localError || error">⚠️ {{ localError || error }}</div>
+
+  <div class="btn-row" *ngIf="selectedMethod">
+    <button class="btn-back" (click)="back.emit()">← Atrás</button>
+    <button class="btn-primary" (click)="onSave()" [disabled]="isSaving">
+      <span *ngIf="!isSaving">🚀 ¡Empezar!</span>
+      <ion-spinner *ngIf="isSaving" name="crescent" color="light"></ion-spinner>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnóstico n8n - Cuentos Infantiles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .result-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-content {
+            line-height: 1.6;
+        }
+
+        .result-content h3 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .checklist li::before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .checklist li.error::before {
+            content: "✗ ";
+            color: #dc3545;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .diagnostic-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .diagnostic-item h4 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .diagnostic-item p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .diagnostic-item code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico n8n</h1>
+        <p class="subtitle">Herramienta de diagnóstico para el webhook de generación de historias</p>
+
+        <div class="section">
+            <h2>⚙️ Configuración</h2>
+            <label for="webhookUrl">URL del Webhook de n8n:</label>
+            <input type="text" id="webhookUrl" value="https://desarrollolmal.app.n8n.cloud/webhook/generate-story" placeholder="https://tu-instancia.n8n.cloud/webhook/generate-story">
+        </div>
+
+        <div class="section">
+            <h2>🧪 Pruebas Disponibles</h2>
+            <div class="button-group">
+                <button class="btn-primary" onclick="runFullDiagnostic()">
+                    🔍 Diagnóstico Completo
+                </button>
+                <button class="btn-secondary" onclick="testConnection()">
+                    🌐 Probar Conexión
+                </button>
+                <button class="btn-success" onclick="testStoryGeneration()">
+                    📚 Generar Historia
+                </button>
+            </div>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function runFullDiagnostic() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'info';
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    <span class="spinner"></span>
+                    Ejecutando diagnóstico completo...
+                </div>
+            `;
+
+            const url = document.getElementById('webhookUrl').value;
+            const diagnostics = [];
+
+            // 1. Verificar URL
+            diagnostics.push(await checkUrl(url));
+
+            // 2. Verificar CORS
+            diagnostics.push(await checkCORS(url));
+
+            // 3. Verificar webhook activo
+            diagnostics.push(await checkWebhookActive(url));
+
+            // 4. Probar generación de historia
+            diagnostics.push(await checkStoryGeneration(url));
+
+            // Mostrar resultados
+            displayDiagnosticResults(diagnostics);
+        }
+
+        async function checkUrl(url) {
+            const result = {
+                name: 'Validación de URL',
+                status: 'success',
+                message: '',
+                details: []
+            };
+
+            if (!url) {
+                result.status = 'error';
+                result.message = 'URL vacía';
+                result.details.push('Debes proporcionar una URL del webhook');
+                return result;
+            }
+
+            if (!url.startsWith('https://')) {
+                result.status = 'error';
+                result.message = 'URL debe usar HTTPS';
+                result.details.push('La URL debe comenzar con https://');
+                return result;
+            }
+
+            if (!url.includes('n8n.cloud') && !url.includes('n8n.io')) {
+                result.status = 'warning';
+                result.message = 'URL no parece ser de n8n';
+                result.details.push('Verifica que sea la URL correcta de tu instancia n8n');
+            } else {
+                result.message = 'URL válida';
+                result.details.push(`URL: ${url}`);
+            }
+
+            return result;
+        }
+
+        async function checkCORS(url) {
+            const result = {
+                name: 'Verificación de CORS',
+                status: 'unknown',
+                message: '',
+                details: []
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const corsHeader = response.headers.get('Access-Control-Allow-Origin');
+                
+                if (corsHeader) {
+                    result.status = 'success';
+                    result.message = 'CORS configurado correctamente';
+                    result.details.push(`Access-Control-Allow-Origin: ${corsHeader}`);
+                } else {
+                    result.status = 'warning';
+                    result.message = 'No se detectaron headers CORS';
+                    result.details.push('Puede que necesites configurar CORS en n8n');
+                }
+            } catch (error) {
+                result.status = 'error';
+                result.message = 'Error al verificar CORS';
+                result.details.push(error.message);
+            }
+
+            return result;
+        }
+
+        async function checkWebhookActive(url) {
+            const result = {
+                name: 'Estado del Webhook',
+                status: 'unknown',
+                message: '',
+                details: []
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        test: true
+                    })
+                });
+
+                if (response.ok) {
+                    result.status = 'success';
+                    result.message = 'Webhook está activo y responde';
+                    result.details.push(`Status: ${response.status} ${response.statusText}`);
+                } else if (response.status === 500) {
+                    result.status = 'warning';
+                    result.message = 'Webhook activo pero hay un error en el workflow';
+                    result.details.push(`Status: ${response.status}`);
+                    result.details.push('Revisa los logs en n8n para ver el error específico');
+                    
+                    try {
+                        const errorData = await response.json();
+                        result.details.push(`Error: ${JSON.stringify(errorData, null, 2)}`);
+                    } catch (e) {
+                        const errorText = await response.text();
+                        result.details.push(`Error: ${errorText}`);
+                    }
+                } else {
+                    result.status = 'error';
+                    result.message = 'Webhook no responde correctamente';
+                    result.details.push(`Status: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                result.status = 'error';
+                result.message = 'No se pudo conectar con el webhook';
+                result.details.push(error.message);
+                result.details.push('Verifica que el workflow esté activo en n8n');
+            }
+
+            return result;
+        }
+
+        async function checkStoryGeneration(url) {
+            const result = {
+                name: 'Generación de Historia',
+                status: 'unknown',
+                message: '',
+                details: []
+            };
+
+            const testData = {
+                characters: ['dragon', 'princesa'],
+                setting: 'castillo',
+                storyType: 'aventura',
+                childName: 'Test',
+                childAge: 8
+            };
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const endTime = Date.now();
+                const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.title && data.content) {
+                        result.status = 'success';
+                        result.message = `Historia generada exitosamente en ${duration}s`;
+                        result.details.push(`Título: ${data.title}`);
+                        result.details.push(`Contenido: ${data.content.substring(0, 100)}...`);
+                        result.details.push(`Tiempo de respuesta: ${duration}s`);
+                    } else {
+                        result.status = 'warning';
+                        result.message = 'Respuesta incompleta';
+                        result.details.push('La respuesta no tiene todos los campos esperados');
+                        result.details.push(`Respuesta: ${JSON.stringify(data, null, 2)}`);
+                    }
+                } else {
+                    result.status = 'error';
+                    result.message = `Error ${response.status}: ${response.statusText}`;
+                    
+                    try {
+                        const errorData = await response.json();
+                        result.details.push(`Error: ${JSON.stringify(errorData, null, 2)}`);
+                        
+                        // Analizar el error específico
+                        if (errorData.message) {
+                            if (errorData.message.includes('API key')) {
+                                result.details.push('⚠️ Problema con la API Key de OpenAI');
+                                result.details.push('Solución: Verifica las credenciales en n8n');
+                            } else if (errorData.message.includes('quota')) {
+                                result.details.push('⚠️ Créditos de OpenAI agotados');
+                                result.details.push('Solución: Recarga créditos en https://platform.openai.com/usage');
+                            } else if (errorData.message.includes('rate limit')) {
+                                result.details.push('⚠️ Límite de peticiones alcanzado');
+                                result.details.push('Solución: Espera 1 minuto e intenta de nuevo');
+                            }
+                        }
+                    } catch (e) {
+                        const errorText = await response.text();
+                        result.details.push(`Error: ${errorText}`);
+                    }
+                }
+            } catch (error) {
+                result.status = 'error';
+                result.message = 'Error de conexión';
+                result.details.push(error.message);
+            }
+
+            return result;
+        }
+
+        function displayDiagnosticResults(diagnostics) {
+            const resultDiv = document.getElementById('result');
+            
+            const hasErrors = diagnostics.some(d => d.status === 'error');
+            const hasWarnings = diagnostics.some(d => d.status === 'warning');
+            const allSuccess = diagnostics.every(d => d.status === 'success');
+
+            let className = 'info';
+            let icon = '🔍';
+            let title = 'Diagnóstico Completado';
+
+            if (allSuccess) {
+                className = 'success';
+                icon = '✅';
+                title = '¡Todo funciona correctamente!';
+            } else if (hasErrors) {
+                className = 'error';
+                icon = '❌';
+                title = 'Se encontraron errores';
+            } else if (hasWarnings) {
+                className = 'warning';
+                icon = '⚠️';
+                title = 'Se encontraron advertencias';
+            }
+
+            resultDiv.className = className;
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    ${icon} ${title}
+                </div>
+                <div class="result-content">
+                    ${diagnostics.map(d => `
+                        <div class="diagnostic-item">
+                            <h4>${getStatusIcon(d.status)} ${d.name}</h4>
+                            <p><strong>${d.message}</strong></p>
+                            ${d.details.map(detail => `<p>• ${detail}</p>`).join('')}
+                        </div>
+                    `).join('')}
+                    
+                    ${hasErrors || hasWarnings ? `
+                        <h3>📋 Pasos Recomendados:</h3>
+                        <ul class="checklist">
+                            ${hasErrors ? '<li class="error">Revisa los errores marcados arriba</li>' : ''}
+                            <li>Verifica que el workflow esté activo (verde) en n8n</li>
+                            <li>Verifica las credenciales de OpenAI en n8n</li>
+                            <li>Revisa los logs del workflow en n8n</li>
+                            <li>Verifica que tengas créditos en OpenAI</li>
+                            <li>Asegúrate de que CORS esté configurado</li>
+                        </ul>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'success': return '✅';
+                case 'error': return '❌';
+                case 'warning': return '⚠️';
+                default: return '❓';
+            }
+        }
+
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'info';
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    <span class="spinner"></span>
+                    Probando conexión...
+                </div>
+            `;
+
+            const url = document.getElementById('webhookUrl').value;
+            const diagnostic = await checkWebhookActive(url);
+            
+            displayDiagnosticResults([diagnostic]);
+        }
+
+        async function testStoryGeneration() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'info';
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    <span class="spinner"></span>
+                    Generando historia de prueba...
+                </div>
+            `;
+
+            const url = document.getElementById('webhookUrl').value;
+            const diagnostic = await checkStoryGeneration(url);
+            
+            displayDiagnosticResults([diagnostic]);
+        }
+    </script>
+</body>
+</html>
