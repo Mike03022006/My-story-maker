@@ -402,10 +402,10 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [`LICENSE`](LICENSE) pa
 
 ## 👨‍💻 Autor
 
-**Miguel Ramirez**
+**Luis Miguel Angel Lemus**
 
 - GitHub: [@Mike03022006](https://github.com/Mike03022006)
-- Email: mike03022006@example.com
+- Email: angellemusluismiguel2006@gmail.com
 
 ---
 
